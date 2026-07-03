@@ -2,39 +2,45 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Mi Pokédex Personal</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f9; text-align: center; }
-        .card { background: white; border-radius: 10px; display: inline-block; width: 150px; margin: 10px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        img { width: 100px; height: 100px; }
-    </style>
+    <title>Pokédex</title>
 </head>
 <body>
     <h1>Tu Colección de Pokémon</h1>
-    <div id="pokedex-container">Cargando tus Pokémon...</div>
+    <div id="pokedex-container">Cargando...</div>
 
     <script>
-        // Obtener el usuario del link (ej: pokedex.html?usuario=Bounert)
         const params = new URLSearchParams(window.location.search);
         const usuario = params.get('usuario');
-
-        async function cargarPokedex() {
-            const url = `https://wyhkjzhxbpjznfayokwm.supabase.co/rest/v1/Capturas?Usuario=eq.${usuario}&apikey=sb_publishable_wQkm_AkCLTtahZ7ijz7QHg_KQ9-0u8Pz_86N_S60`;
-            const response = await fetch(url);
-            const data = await response.json();
-            
+        
+        async function cargar() {
             const container = document.getElementById('pokedex-container');
-            container.innerHTML = '';
+            const url = `https://wyhkjzhxbpjznfayokwm.supabase.co/rest/v1/Capturas?Usuario=eq.${encodeURIComponent(usuario)}&apikey=sb_publishable_wQkm_AkCLTtahZ7ijz7QHg_KQ9-0u8Pz_86N_S60`;
             
-            data.forEach(poke => {
-                container.innerHTML += `
-                    <div class="card">
-                        <img src="${poke.Imagen}" alt="${poke.Pokemon}">
-                        <h3>${poke.Pokemon}</h3>
-                    </div>`;
-            });
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                console.log("Respuesta de Supabase:", data);
+
+                if (!response.ok) {
+                    container.innerHTML = "Error de conexión: " + JSON.stringify(data);
+                } else if (!Array.isArray(data)) {
+                    container.innerHTML = "Error: El formato de datos no es una lista.";
+                } else if (data.length === 0) {
+                    container.innerHTML = "No se encontraron Pokémon para " + usuario;
+                } else {
+                    container.innerHTML = data.map(poke => `
+                        <div style="display:inline-block; margin:10px; border:1px solid #ccc; padding:10px;">
+                            <img src="${poke.Imagen}" style="width:100px;">
+                            <h3>${poke.Pokemon}</h3>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                container.innerHTML = "Error crítico: " + error.message;
+            }
         }
-        cargarPokedex();
+        cargar();
     </script>
 </body>
 </html>
