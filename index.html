@@ -1,24 +1,37 @@
-<script>
-    const API_URL = "https://wyhkjzhxbpjznfayokwm.supabase.co/rest/v1/Capturas";
-    const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5aGtqemh4YnBqem5mYXlva3dtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjg3MDEsImV4cCI6MjA5ODYwNDcwMX0.ObEQazEofg7El_0j6PXezNiWrBAeibW67YwDPiPJmLk";
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Mi Pokédex</title>
+</head>
+<body>
+    <h1>Mi Colección</h1>
+    <div id="lista">Cargando...</div>
 
-    fetch(API_URL, { headers: { "apikey": KEY, "Authorization": "Bearer " + KEY } })
-    .then(r => r.json())
-    .then(data => {
-        document.getElementById("lista").innerHTML = data.map(p => {
-            // El nombre debe estar en minúsculas y sin espacios
-            const nombre = p.Pokemon.toLowerCase().trim();
-            
-            // USAMOS ESTA URL QUE ES MÁS ESTABLE
-            const urlImg = `https://img.pokemondb.net/artwork/large/${nombre}.jpg`;
-            
-            return `
-                <div style="border:1px solid #ccc; margin:10px; padding:10px; display:inline-block; text-align:center; width:150px;">
-                    <img src="${urlImg}" width="100" 
-                         onerror="this.src='https://via.placeholder.com/100?text=NoEncontrado';">
-                    <p>${p.Pokemon}</p>
-                </div>
-            `;
-        }).join("");
-    });
-</script>
+    <script>
+        const API_URL = "https://wyhkjzhxbpjznfayokwm.supabase.co/rest/v1/Capturas";
+        const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5aGtqemh4YnBqem5mYXlva3dtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjg3MDEsImV4cCI6MjA5ODYwNDcwMX0.ObEQazEofg7El_0j6PXezNiWrBAeibW67YwDPiPJmLk";
+
+        fetch(API_URL, { headers: { "apikey": KEY, "Authorization": "Bearer " + KEY } })
+        .then(r => r.json())
+        .then(data => {
+            let html = "";
+            data.forEach(p => {
+                const nombre = p.Pokemon.toLowerCase().trim();
+                const urlImg = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${nombre}.png`;
+                
+                html += `
+                    <div style="border:1px solid #ccc; margin:10px; padding:10px; display:inline-block; text-align:center; width:150px;">
+                        <img src="${urlImg}" width="100" onerror="this.src='https://via.placeholder.com/100?text=SinImagen'">
+                        <p>${p.Pokemon}</p>
+                    </div>
+                `;
+            });
+            document.getElementById("lista").innerHTML = html;
+        })
+        .catch(err => {
+            document.getElementById("lista").innerHTML = "Error al conectar con la base de datos.";
+        });
+    </script>
+</body>
+</html>
