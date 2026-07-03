@@ -14,7 +14,6 @@
 
     <h1>Tu Colección de Pokémon</h1>
 
-    <!-- Barra de búsqueda -->
     <input type="text" id="busqueda" placeholder="Buscar Pokémon capturado..." onkeyup="filtrar()">
 
     <div id="pokedex-container">Cargando colección...</div>
@@ -23,9 +22,9 @@
         const params = new URLSearchParams(window.location.search);
         const usuario = params.get('usuario');
         const URL_SUPABASE = "https://wyhkjzhxbpjznfayokwm.supabase.co/rest/v1/Capturas";
-        const API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5aGtqemh4YnBqem5mYXlva3dtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjg3MDEsImV4cCI6MjA5ODYwNDcwMX0.ObEQazEofg7El_0j6PXezNiWrBAeibW67YwDPiPJmLk"; // RECUERDA PONER TU CLAVE AQUÍ
+        const API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5aGtqemh4YnBqem5mYXlva3dtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjg3MDEsImV4cCI6MjA5ODYwNDcwMX0.ObEQazEofg7El_0j6PXezNiWrBAeibW67YwDPiPJmLk"; 
         
-        let listaPokemon = []; // Aquí guardaremos la lista completa
+        let listaPokemon = []; 
 
         async function cargarPokedex() {
             const container = document.getElementById('pokedex-container');
@@ -41,9 +40,12 @@
                 container.innerHTML = "<p>No capturaste este Pokémon aún</p>";
                 return;
             }
+            // Aquí está el cambio: construimos la URL de la imagen usando el nombre del Pokemon
             container.innerHTML = lista.map(poke => `
                 <div class="card">
-                    <img src="${poke.Imagen}" alt="${poke.Pokemon}">
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${poke.Pokemon.toLowerCase()}.png" 
+                         alt="${poke.Pokemon}" 
+                         onerror="this.src='https://via.placeholder.com/150';">
                     <h3>${poke.Pokemon}</h3>
                 </div>
             `).join('');
