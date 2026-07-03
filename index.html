@@ -12,44 +12,55 @@
 <body>
 
     <h1>Tu Colección de Pokémon</h1>
+    
+    <!-- NUEVO: Formulario para capturar -->
+    <div>
+        <input type="text" id="pokeNombre" placeholder="Nombre del Pokémon">
+        <button onclick="capturar()">Capturar</button>
+    </div>
+
     <div id="pokedex-container">Cargando colección...</div>
 
     <script>
         const params = new URLSearchParams(window.location.search);
         const usuario = params.get('usuario');
-        
-        // REEMPLAZA ESTA URL Y API_KEY CON LOS DATOS DE TU PROYECTO
         const URL_SUPABASE = "https://wyhkjzhxbpjznfayokwm.supabase.co/rest/v1/Capturas";
-        const API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5aGtqemh4YnBqem5mYXlva3dtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjg3MDEsImV4cCI6MjA5ODYwNDcwMX0.ObEQazEofg7El_0j6PXezNiWrBAeibW67YwDPiPJmLk"; 
-        
+        const API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5aGtqemh4YnBqem5mYXlva3dtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjg3MDEsImV4cCI6MjA5ODYwNDcwMX0.ObEQazEofg7El_0j6PXezNiWrBAeibW67YwDPiPJmLk"; // REEMPLAZA CON TU CLAVE ANON QUE COPIASTE ANTES
+
+        // Función para capturar un Pokémon nuevo
+        async function capturar() {
+            const nombre = document.getElementById('pokeNombre').value.toLowerCase();
+            if (!nombre) return;
+
+            // 1. Consultar PokeAPI
+            const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${nombre}`);
+            const data = await res.json();
+            const id = data.id;
+            const nombreMayus = data.name.charAt(0).toUpperCase() + data.name.slice(1);
+            const urlImg = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+
+            // 2. Insertar en Supabase
+            await fetch(URL_SUPABASE, {
+                method: 'POST',
+                headers: { 'apikey': API_KEY, 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+                body: JSON.stringify({ Usuario: usuario, Pokemon: nombreMayus, Imagen: urlImg, Fecha: new Date().toLocaleString() })
+            });
+
+            location.reload(); // Recargar para ver el nuevo
+        }
+
         async function cargarPokedex() {
             const container = document.getElementById('pokedex-container');
+            const url = `${URL_SUPABASE}?Usuario=eq.${encodeURIComponent(usuario)}&apikey=${API_KEY}`;
+            const response = await fetch(url, { headers: { 'apikey': API_KEY, 'Authorization': `Bearer ${API_KEY}` } });
+            const data = await response.json();
             
-            if (!usuario) {
-                container.innerHTML = "Por favor, usa la URL con ?usuario=TU_NOMBRE";
-                return;
-            }
-
-            try {
-                const url = `${URL_SUPABASE}?Usuario=eq.${encodeURIComponent(usuario)}&apikey=${API_KEY}`;
-                const response = await fetch(url);
-                const data = await response.json();
-                
-                if (data.length === 0) {
-                    container.innerHTML = "No se encontraron Pokémon para: " + usuario;
-                } else {
-                    container.innerHTML = data.map(poke => `
-                        <div class="card">
-                            <!-- Aquí usamos la URL exacta que guardaste en tu columna 'Imagen' -->
-                            <img src="${poke.Imagen}" alt="${poke.Pokemon}">
-                            <h3>${poke.Pokemon}</h3>
-                            <p style="font-size:0.8em; color:gray;">Capturado: ${poke.Fecha}</p>
-                        </div>
-                    `).join('');
-                }
-            } catch (error) {
-                container.innerHTML = "Error al conectar: " + error.message;
-            }
+            container.innerHTML = data.map(poke => `
+                <div class="card">
+                    <img src="${poke.Imagen}" alt="${poke.Pokemon}">
+                    <h3>${poke.Pokemon}</h3>
+                </div>
+            `).join('');
         }
 
         cargarPokedex();
