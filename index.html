@@ -1,72 +1,26 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Mi Pokédex</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f9; text-align: center; }
-        .card { display: inline-block; margin: 15px; border: 1px solid #ccc; padding: 15px; border-radius: 10px; background: white; width: 180px; vertical-align: top; }
-        img { width: 100%; height: auto; max-width: 150px; }
-        #busqueda { margin: 20px; padding: 10px; width: 250px; }
-    </style>
+    <title>Pokédex</title>
 </head>
 <body>
-
-    <h1>Tu Colección de Pokémon</h1>
-
-    <!-- Barra de búsqueda -->
-    <input type="text" id="busqueda" placeholder="Buscar Pokémon capturado..." onkeyup="filtrar()">
-
-    <div id="pokedex-container">Cargando colección...</div>
+    <h1>Mi Colección</h1>
+    <div id="lista">Cargando...</div>
 
     <script>
-        const params = new URLSearchParams(window.location.search);
-        const usuario = params.get('usuario');
-        const URL_SUPABASE = "https://wyhkjzhxbpjznfayokwm.supabase.co/rest/v1/Capturas";
-        const API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5aGtqemh4YnBqem5mYXlva3dtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjg3MDEsImV4cCI6MjA5ODYwNDcwMX0.ObEQazEofg7El_0j6PXezNiWrBAeibW67YwDPiPJmLk"; 
-        
-        let listaPokemon = []; 
+        const API_URL = "https://wyhkjzhxbpjznfayokwm.supabase.co/rest/v1/Capturas";
+        const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5aGtqemh4YnBqem5mYXlva3dtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjg3MDEsImV4cCI6MjA5ODYwNDcwMX0.ObEQazEofg7El_0j6PXezNiWrBAeibW67YwDPiPJmLk";
 
-        async function cargarPokedex() {
-            const container = document.getElementById('pokedex-container');
-            const url = `${URL_SUPABASE}?Usuario=eq.${encodeURIComponent(usuario)}&apikey=${API_KEY}`;
-            const response = await fetch(url, { headers: { 'apikey': API_KEY, 'Authorization': `Bearer ${API_KEY}` } });
-            listaPokemon = await response.json();
-            mostrar(listaPokemon);
-        }
-
-        function mostrar(lista) {
-            const container = document.getElementById('pokedex-container');
-            if (lista.length === 0) {
-                container.innerHTML = "<p>No capturaste este Pokémon aún</p>";
-                return;
-            }
-            
-            container.innerHTML = lista.map(poke => {
-                // Limpiamos el nombre para asegurar que la URL sea válida
-                const nombreLimpio = poke.Pokemon ? poke.Pokemon.toLowerCase().trim() : "";
-                
-                // Si el nombre es "desconocido" o está vacío, usamos una imagen genérica
-                const urlImagen = (nombreLimpio === "desconocido" || nombreLimpio === "") 
-                    ? "https://via.placeholder.com/150?text=?" 
-                    : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${nombreLimpio}.png`;
-
-                return `
-                    <div class="card">
-                        <img src="${urlImagen}" alt="${poke.Pokemon}" onerror="this.src='https://via.placeholder.com/150'">
-                        <h3>${poke.Pokemon}</h3>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function filtrar() {
-            const query = document.getElementById('busqueda').value.toLowerCase();
-            const filtrados = listaPokemon.filter(p => p.Pokemon && p.Pokemon.toLowerCase().includes(query));
-            mostrar(filtrados);
-        }
-
-        cargarPokedex();
+        fetch(API_URL, { headers: { "apikey": KEY, "Authorization": "Bearer " + KEY } })
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById("lista").innerHTML = data.map(p => `
+                <div style="border:1px solid #ccc; margin:10px; padding:10px; display:inline-block;">
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${p.Pokemon.toLowerCase()}.png" width="100">
+                    <p>${p.Pokemon}</p>
+                </div>
+            `).join("");
+        });
     </script>
 </body>
 </html>
