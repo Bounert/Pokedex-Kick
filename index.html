@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mi Pokédex Personal</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; text-align: center; }
+        .card { background: white; border-radius: 10px; display: inline-block; width: 150px; margin: 10px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        img { width: 100px; height: 100px; }
+    </style>
+</head>
+<body>
+    <h1>Tu Colección de Pokémon</h1>
+    <div id="pokedex-container">Cargando tus Pokémon...</div>
+
+    <script>
+        // Obtener el usuario del link (ej: pokedex.html?usuario=Bounert)
+        const params = new URLSearchParams(window.location.search);
+        const usuario = params.get('usuario');
+
+        async function cargarPokedex() {
+            const url = `https://wyhkjzhxbpjznfayokwm.supabase.co/rest/v1/Capturas?Usuario=eq.${usuario}&apikey=sb_publishable_wQkm_AkCLTtahZ7ijz7QHg_KQ9-0u8Pz_86N_S60`;
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            const container = document.getElementById('pokedex-container');
+            container.innerHTML = '';
+            
+            data.forEach(poke => {
+                container.innerHTML += `
+                    <div class="card">
+                        <img src="${poke.Imagen}" alt="${poke.Pokemon}">
+                        <h3>${poke.Pokemon}</h3>
+                    </div>`;
+            });
+        }
+        cargarPokedex();
+    </script>
+</body>
+</html>
