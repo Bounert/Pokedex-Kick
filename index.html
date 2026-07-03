@@ -2,45 +2,51 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Mi Colección</title>
+    <title>Mi Pokédex</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 20px; }
-        .card { border: 1px solid #ccc; padding: 10px; margin: 5px; display: inline-block; border-radius: 8px; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f4f9; text-align: center; padding: 20px; }
+        #busqueda { margin: 20px; padding: 12px; width: 300px; border: 2px solid #ddd; border-radius: 8px; }
+        .grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; }
+        .card { background: white; border: 2px solid #ddd; padding: 20px; border-radius: 12px; width: 140px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
-    <h1>Mi Colección</h1>
-    <div id="lista">Cargando...</div>
+
+    <h1 id="titulo">Cargando colección...</h1>
+    <input type="text" id="busqueda" placeholder="Buscar en mi colección..." onkeyup="filtrar()">
+    <div class="grid" id="lista"></div>
 
     <script>
         const API_URL = "https://wyhkjzhxbpjznfayokwm.supabase.co/rest/v1/Capturas";
         const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5aGtqemh4YnBqem5mYXlva3dtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjg3MDEsImV4cCI6MjA5ODYwNDcwMX0.ObEQazEofg7El_0j6PXezNiWrBAeibW67YwDPiPJmLk";
-
+        
+        let misPokemon = []; // Guardamos aquí la lista para buscar rápido
         const params = new URLSearchParams(window.location.search);
-        const usuarioActual = params.get('usuario');
+        const usuarioActual = params.get('usuario') || "Bounert"; // Por defecto Bounert
 
-        if (!usuarioActual) {
-            document.getElementById("lista").innerHTML = "Error: Falta poner ?usuario=TU_NOMBRE en la dirección de la web.";
-        } else {
-            const urlFinal = `${API_URL}?Usuario=eq.${encodeURIComponent(usuarioActual)}`;
-            
-            fetch(urlFinal, { headers: { "apikey": KEY, "Authorization": "Bearer " + KEY } })
-            .then(res => {
-                if (!res.ok) throw new Error("Error de conexión: " + res.status);
-                return res.json();
-            })
-            .then(data => {
-                if (data.length === 0) {
-                    document.getElementById("lista").innerHTML = "No hay Pokémon para: " + usuarioActual;
-                } else {
-                    document.getElementById("lista").innerHTML = data.map(p => `
-                        <div class="card">${p.Pokemon}</div>
-                    `).join("");
-                }
-            })
-            .catch(err => {
-                document.getElementById("lista").innerHTML = "Fallo: " + err.message;
-            });
+        // 1. Cargar datos
+        fetch(`${API_URL}?Usuario=eq.${encodeURIComponent(usuarioActual)}`, { 
+            headers: { "apikey": KEY, "Authorization": "Bearer " + KEY } 
+        })
+        .then(r => r.json())
+        .then(data => {
+            misPokemon = data;
+            document.getElementById("titulo").innerText = "Colección de " + usuarioActual;
+            mostrar(misPokemon);
+        });
+
+        // 2. Función mostrar
+        function mostrar(lista) {
+            document.getElementById("lista").innerHTML = lista.map(p => `
+                <div class="card"><strong>${p.Pokemon}</strong></div>
+            `).join("");
+        }
+
+        // 3. Función filtrar
+        function filtrar() {
+            const query = document.getElementById('busqueda').value.toLowerCase();
+            const filtrados = misPokemon.filter(p => p.Pokemon.toLowerCase().includes(query));
+            mostrar(filtrados);
         }
     </script>
 </body>
