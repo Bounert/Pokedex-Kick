@@ -1,33 +1,47 @@
-<script>
-    const API_URL = "https://wyhkjzhxbpjznfayokwm.supabase.co/rest/v1/Capturas";
-    const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5aGtqemh4YnBqem5mYXlva3dtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjg3MDEsImV4cCI6MjA5ODYwNDcwMX0.ObEQazEofg7El_0j6PXezNiWrBAeibW67YwDPiPJmLk";
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mi Colección</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 20px; }
+        .card { border: 1px solid #ccc; padding: 10px; margin: 5px; display: inline-block; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <h1>Mi Colección</h1>
+    <div id="lista">Cargando...</div>
 
-    // 1. Capturamos el usuario de la URL (ejemplo: ?usuario=ElTucuPeque)
-    const params = new URLSearchParams(window.location.search);
-    const usuarioActual = params.get('usuario'); 
+    <script>
+        const API_URL = "https://wyhkjzhxbpjznfayokwm.supabase.co/rest/v1/Capturas";
+        const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5aGtqemh4YnBqem5mYXlva3dtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjg3MDEsImV4cCI6MjA5ODYwNDcwMX0.ObEQazEofg7El_0j6PXezNiWrBAeibW67YwDPiPJmLk";
 
-    // 2. Si no hay usuario en la URL, avisamos
-    if (!usuarioActual) {
-        document.getElementById("lista").innerHTML = "Por favor, añade ?usuario=TU_NOMBRE a la URL.";
-    } else {
-        // 3. Filtramos la consulta para que Supabase solo traiga los del usuario
-        // La sintaxis 'eq' significa "equal" (igual a)
-        const urlFiltrada = `${API_URL}?Usuario=eq.${encodeURIComponent(usuarioActual)}`;
+        const params = new URLSearchParams(window.location.search);
+        const usuarioActual = params.get('usuario');
 
-        fetch(urlFiltrada, { 
-            headers: { "apikey": KEY, "Authorization": "Bearer " + KEY } 
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.length === 0) {
-                document.getElementById("lista").innerHTML = "No se encontraron Pokémon para " + usuarioActual;
-            } else {
-                document.getElementById("lista").innerHTML = data.map(p => `
-                    <div class="card">
-                        <strong>${p.Pokemon}</strong>
-                    </div>
-                `).join("");
-            }
-        });
-    }
-</script>
+        if (!usuarioActual) {
+            document.getElementById("lista").innerHTML = "Error: Falta poner ?usuario=TU_NOMBRE en la dirección de la web.";
+        } else {
+            const urlFinal = `${API_URL}?Usuario=eq.${encodeURIComponent(usuarioActual)}`;
+            
+            fetch(urlFinal, { headers: { "apikey": KEY, "Authorization": "Bearer " + KEY } })
+            .then(res => {
+                if (!res.ok) throw new Error("Error de conexión: " + res.status);
+                return res.json();
+            })
+            .then(data => {
+                if (data.length === 0) {
+                    document.getElementById("lista").innerHTML = "No hay Pokémon para: " + usuarioActual;
+                } else {
+                    document.getElementById("lista").innerHTML = data.map(p => `
+                        <div class="card">${p.Pokemon}</div>
+                    `).join("");
+                }
+            })
+            .catch(err => {
+                document.getElementById("lista").innerHTML = "Fallo: " + err.message;
+            });
+        }
+    </script>
+</body>
+</html>
