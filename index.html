@@ -1,12 +1,20 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Mi Pokédex</title>
+    <title>Mi Colección</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; text-align: center; padding: 20px; }
+        .grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; }
+        .card { background: white; border: 2px solid #ddd; padding: 20px; border-radius: 12px; width: 140px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s; }
+        .card:hover { transform: translateY(-5px); border-color: #666; }
+        h1 { color: #333; }
+    </style>
 </head>
 <body>
+
     <h1>Mi Colección</h1>
-    <div id="lista">Cargando...</div>
+    <div class="grid" id="lista">Cargando colección...</div>
 
     <script>
         const API_URL = "https://wyhkjzhxbpjznfayokwm.supabase.co/rest/v1/Capturas";
@@ -15,19 +23,12 @@
         fetch(API_URL, { headers: { "apikey": KEY, "Authorization": "Bearer " + KEY } })
         .then(r => r.json())
         .then(data => {
-            let html = "";
-            data.forEach(p => {
-                const nombre = p.Pokemon.toLowerCase().trim();
-                const urlImg = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${nombre}.png`;
-                
-                html += `
-                    <div style="border:1px solid #ccc; margin:10px; padding:10px; display:inline-block; text-align:center; width:150px;">
-                        <img src="${urlImg}" width="100" onerror="this.src='https://via.placeholder.com/100?text=SinImagen'">
-                        <p>${p.Pokemon}</p>
-                    </div>
-                `;
-            });
-            document.getElementById("lista").innerHTML = html;
+            const container = document.getElementById("lista");
+            container.innerHTML = data.map(p => `
+                <div class="card">
+                    <strong>${p.Pokemon}</strong>
+                </div>
+            `).join("");
         })
         .catch(err => {
             document.getElementById("lista").innerHTML = "Error al conectar con la base de datos.";
