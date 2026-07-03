@@ -23,9 +23,9 @@
         const params = new URLSearchParams(window.location.search);
         const usuario = params.get('usuario');
         const URL_SUPABASE = "https://wyhkjzhxbpjznfayokwm.supabase.co/rest/v1/Capturas";
-        const API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5aGtqemh4YnBqem5mYXlva3dtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjg3MDEsImV4cCI6MjA5ODYwNDcwMX0.ObEQazEofg7El_0j6PXezNiWrBAeibW67YwDPiPJmLk"; // RECUERDA PONER TU CLAVE AQUÍ
+        const API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5aGtqemh4YnBqem5mYXlva3dtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjg3MDEsImV4cCI6MjA5ODYwNDcwMX0.ObEQazEofg7El_0j6PXezNiWrBAeibW67YwDPiPJmLk"; 
         
-        let listaPokemon = []; // Aquí guardaremos la lista completa
+        let listaPokemon = []; 
 
         async function cargarPokedex() {
             const container = document.getElementById('pokedex-container');
@@ -41,17 +41,28 @@
                 container.innerHTML = "<p>No capturaste este Pokémon aún</p>";
                 return;
             }
-            container.innerHTML = lista.map(poke => `
-                <div class="card">
-                    <img src="${poke.Imagen}" alt="${poke.Pokemon}">
-                    <h3>${poke.Pokemon}</h3>
-                </div>
-            `).join('');
+            
+            container.innerHTML = lista.map(poke => {
+                // Limpiamos el nombre para asegurar que la URL sea válida
+                const nombreLimpio = poke.Pokemon ? poke.Pokemon.toLowerCase().trim() : "";
+                
+                // Si el nombre es "desconocido" o está vacío, usamos una imagen genérica
+                const urlImagen = (nombreLimpio === "desconocido" || nombreLimpio === "") 
+                    ? "https://via.placeholder.com/150?text=?" 
+                    : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${nombreLimpio}.png`;
+
+                return `
+                    <div class="card">
+                        <img src="${urlImagen}" alt="${poke.Pokemon}" onerror="this.src='https://via.placeholder.com/150'">
+                        <h3>${poke.Pokemon}</h3>
+                    </div>
+                `;
+            }).join('');
         }
 
         function filtrar() {
             const query = document.getElementById('busqueda').value.toLowerCase();
-            const filtrados = listaPokemon.filter(p => p.Pokemon.toLowerCase().includes(query));
+            const filtrados = listaPokemon.filter(p => p.Pokemon && p.Pokemon.toLowerCase().includes(query));
             mostrar(filtrados);
         }
 
