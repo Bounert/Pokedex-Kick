@@ -5,47 +5,45 @@
     <title>Mi Pokédex</title>
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f4f9; text-align: center; }
-        .card { display: inline-block; margin: 15px; border: 1px solid #ccc; padding: 15px; border-radius: 10px; background: white; width: 150px; }
-        img { width: 100%; height: auto; }
+        .card { display: inline-block; margin: 15px; border: 1px solid #ccc; padding: 15px; border-radius: 10px; background: white; width: 180px; vertical-align: top; }
+        img { width: 100%; height: auto; max-width: 150px; }
     </style>
 </head>
 <body>
 
     <h1>Tu Colección de Pokémon</h1>
-    <div id="pokedex-container">Cargando datos...</div>
+    <div id="pokedex-container">Cargando colección...</div>
 
     <script>
-        // 1. Obtenemos el usuario de la URL
         const params = new URLSearchParams(window.location.search);
         const usuario = params.get('usuario');
         
-        // 2. Configura aquí tu URL de Supabase y tu API KEY (anon)
+        // REEMPLAZA ESTA URL Y API_KEY CON LOS DATOS DE TU PROYECTO
         const URL_SUPABASE = "https://wyhkjzhxbpjznfayokwm.supabase.co/rest/v1/Capturas";
-        const API_KEY = "sb_publishable_wQkm_AkCLTtahZ7ijz7QHg_KQ9-0VxG"; // REEMPLAZA ESTO CON TU CLAVE REAL
+        const API_KEY = "sb_publishable_wQkm_AkCLTtahZ7ijz7QHg_KQ9-0VxG"; 
         
         async function cargarPokedex() {
             const container = document.getElementById('pokedex-container');
             
             if (!usuario) {
-                container.innerHTML = "Por favor, añade ?usuario=TU_NOMBRE al final de la URL.";
+                container.innerHTML = "Por favor, usa la URL con ?usuario=TU_NOMBRE";
                 return;
             }
 
             try {
-                // Hacemos la consulta filtrando por usuario
                 const url = `${URL_SUPABASE}?Usuario=eq.${encodeURIComponent(usuario)}&apikey=${API_KEY}`;
                 const response = await fetch(url);
                 const data = await response.json();
                 
-                console.log("Datos:", data); // Mira esto en F12 -> Console si algo falla
-
                 if (data.length === 0) {
                     container.innerHTML = "No se encontraron Pokémon para: " + usuario;
                 } else {
                     container.innerHTML = data.map(poke => `
                         <div class="card">
-                            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${poke.Numero}.png" alt="${poke.Pokemon}">
+                            <!-- Aquí usamos la URL exacta que guardaste en tu columna 'Imagen' -->
+                            <img src="${poke.Imagen}" alt="${poke.Pokemon}">
                             <h3>${poke.Pokemon}</h3>
+                            <p style="font-size:0.8em; color:gray;">Capturado: ${poke.Fecha}</p>
                         </div>
                     `).join('');
                 }
