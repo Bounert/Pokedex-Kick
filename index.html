@@ -1,38 +1,33 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Mi Colección</title>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; text-align: center; padding: 20px; }
-        .grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; }
-        .card { background: white; border: 2px solid #ddd; padding: 20px; border-radius: 12px; width: 140px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s; }
-        .card:hover { transform: translateY(-5px); border-color: #666; }
-        h1 { color: #333; }
-    </style>
-</head>
-<body>
+<script>
+    const API_URL = "https://wyhkjzhxbpjznfayokwm.supabase.co/rest/v1/Capturas";
+    const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5aGtqemh4YnBqem5mYXlva3dtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjg3MDEsImV4cCI6MjA5ODYwNDcwMX0.ObEQazEofg7El_0j6PXezNiWrBAeibW67YwDPiPJmLk";
 
-    <h1>Mi Colección</h1>
-    <div class="grid" id="lista">Cargando colección...</div>
+    // 1. Capturamos el usuario de la URL (ejemplo: ?usuario=ElTucuPeque)
+    const params = new URLSearchParams(window.location.search);
+    const usuarioActual = params.get('usuario'); 
 
-    <script>
-        const API_URL = "https://wyhkjzhxbpjznfayokwm.supabase.co/rest/v1/Capturas";
-        const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5aGtqemh4YnBqem5mYXlva3dtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjg3MDEsImV4cCI6MjA5ODYwNDcwMX0.ObEQazEofg7El_0j6PXezNiWrBAeibW67YwDPiPJmLk";
+    // 2. Si no hay usuario en la URL, avisamos
+    if (!usuarioActual) {
+        document.getElementById("lista").innerHTML = "Por favor, añade ?usuario=TU_NOMBRE a la URL.";
+    } else {
+        // 3. Filtramos la consulta para que Supabase solo traiga los del usuario
+        // La sintaxis 'eq' significa "equal" (igual a)
+        const urlFiltrada = `${API_URL}?Usuario=eq.${encodeURIComponent(usuarioActual)}`;
 
-        fetch(API_URL, { headers: { "apikey": KEY, "Authorization": "Bearer " + KEY } })
+        fetch(urlFiltrada, { 
+            headers: { "apikey": KEY, "Authorization": "Bearer " + KEY } 
+        })
         .then(r => r.json())
         .then(data => {
-            const container = document.getElementById("lista");
-            container.innerHTML = data.map(p => `
-                <div class="card">
-                    <strong>${p.Pokemon}</strong>
-                </div>
-            `).join("");
-        })
-        .catch(err => {
-            document.getElementById("lista").innerHTML = "Error al conectar con la base de datos.";
+            if (data.length === 0) {
+                document.getElementById("lista").innerHTML = "No se encontraron Pokémon para " + usuarioActual;
+            } else {
+                document.getElementById("lista").innerHTML = data.map(p => `
+                    <div class="card">
+                        <strong>${p.Pokemon}</strong>
+                    </div>
+                `).join("");
+            }
         });
-    </script>
-</body>
-</html>
+    }
+</script>
