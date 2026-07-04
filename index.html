@@ -20,29 +20,31 @@
         const API_URL = "https://wyhkjzhxbpjznfayokwm.supabase.co/rest/v1/Capturas";
         const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5aGtqemh4YnBqem5mYXlva3dtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjg3MDEsImV4cCI6MjA5ODYwNDcwMX0.ObEQazEofg7El_0j6PXezNiWrBAeibW67YwDPiPJmLk";
         
-        let misPokemon = []; // Guardamos aquí la lista para buscar rápido
+        let misPokemon = []; 
         const params = new URLSearchParams(window.location.search);
-        const usuarioActual = params.get('usuario') || "Bounert"; // Por defecto Bounert
+        const usuarioActual = params.get('usuario') || "Bounert"; 
 
-        // 1. Cargar datos
+        // 1. Cargar datos filtrando los "Desconocido" desde el inicio
         fetch(`${API_URL}?Usuario=eq.${encodeURIComponent(usuarioActual)}`, { 
             headers: { "apikey": KEY, "Authorization": "Bearer " + KEY } 
         })
         .then(r => r.json())
         .then(data => {
-            misPokemon = data;
+            // Filtramos eliminando cualquier registro que sea "Desconocido" (o vacío)
+            misPokemon = data.filter(p => p.Pokemon && p.Pokemon.toLowerCase() !== "desconocido");
+            
             document.getElementById("titulo").innerText = "Colección de " + usuarioActual;
             mostrar(misPokemon);
         });
 
-        // 2. Función mostrar
+        // 2. Función para mostrar tarjetas
         function mostrar(lista) {
             document.getElementById("lista").innerHTML = lista.map(p => `
                 <div class="card"><strong>${p.Pokemon}</strong></div>
             `).join("");
         }
 
-        // 3. Función filtrar
+        // 3. Función para buscar
         function filtrar() {
             const query = document.getElementById('busqueda').value.toLowerCase();
             const filtrados = misPokemon.filter(p => p.Pokemon.toLowerCase().includes(query));
